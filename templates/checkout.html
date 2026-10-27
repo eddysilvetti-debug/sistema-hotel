@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Check-out - Habitación {{ datos.numero_habitacion }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-danger text-white text-center">
+                        <h4 class="mb-0">Cuenta Final - Hab. {{ datos.numero_habitacion }}</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <h6 class="text-muted">Datos del Huésped</h6>
+                        <p class="mb-1"><strong>Nombre:</strong> {{ datos.nombre_completo }} (CI: {{ datos.ci }})</p>
+                        <p class="mb-4"><strong>Ingreso:</strong> {{ datos.fecha_ingreso.strftime('%Y-%m-%d %H:%M') }}</p>
+                        
+                        <h6 class="text-muted border-bottom pb-2">Desglose de Cobro</h6>
+                        <table class="table table-sm mt-3">
+                            <tbody>
+                                <tr>
+                                    <td>Estancia ({{ datos.dias }} noches x {{ datos.precio_base }} Bs)</td>
+                                    <td class="text-end">{{ datos.total_habitacion }} Bs</td>
+                                </tr>
+                                <tr>
+                                    <td>Parqueo ({{ datos.dias }} noches x {{ datos.precio_parqueo }} Bs)</td>
+                                    <td class="text-end">{{ datos.total_parqueo }} Bs</td>
+                                </tr>
+                                
+                                <!-- Fila nueva para los consumos -->
+                                <tr>
+                                    <td>Consumos Extras (Bebidas/Snacks)</td>
+                                    <td class="text-end">{{ datos.total_consumos }} Bs</td>
+                                </tr>
+                                
+                                <!-- Detalle de consumos en letra pequeña -->
+                                {% if datos.lista_consumos %}
+                                <tr>
+                                    <td colspan="2" class="text-muted small bg-light">
+                                        <em>Detalle:</em><br>
+                                        {% for item in datos.lista_consumos %}
+                                            &bull; {{ item.cantidad }}x {{ item.nombre_producto }} ({{ item.subtotal }} Bs)<br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold fs-5 table-active">
+                                    <td>TOTAL A PAGAR:</td>
+                                    <td class="text-end text-danger">{{ datos.gran_total }} Bs</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <form action="/checkout/{{ datos.numero_habitacion }}" method="POST" class="mt-4">
+                            <!-- Datos de Facturación -->
+                            <h6 class="text-muted border-bottom pb-2 mt-4">Datos de Facturación</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label">NIT / CI</label>
+                                    <!-- Ponemos '0' por defecto por si el cliente no quiere factura -->
+                                    <input type="text" name="nit" class="form-control" value="0" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">Razón Social / Nombre</label>
+                                    <input type="text" name="razon_social" class="form-control" value="S/N" required>
+                                </div>
+                            </div>
+
+                            <!-- Valores ocultos para enviar a Python -->
+                            <input type="hidden" name="total_habitacion" value="{{ datos.total_habitacion }}">
+                            <input type="hidden" name="total_parqueo" value="{{ datos.total_parqueo }}">
+                            <input type="hidden" name="total_consumos" value="{{ datos.total_consumos }}">
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger btn-lg">Emitir Factura y Liberar Habitación</button>
+                                <a href="/" class="btn btn-outline-secondary">Volver al Panel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
